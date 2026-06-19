@@ -30,13 +30,6 @@ steps:
       testResultsFiles: '**/junit-results/*.xml'
       testRunTitle: 'WDIO UI Tests'
 
-  - script: npx allure-commandline@2.34.0 generate allure-results --clean -o allure-report
+  - task: PublishAllureReport@2
     condition: always()
-    displayName: 'Generate Allure HTML report'
-
-  - task: PublishBuildArtifacts@1
-    condition: always()
-    inputs:
-      pathToPublish: 'allure-report'
-      artifactName: 'allure-report'
-    displayName: 'Publish Allure report as artifact'
+    displayName: 'Publish Allure Report'

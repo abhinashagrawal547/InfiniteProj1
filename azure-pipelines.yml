@@ -34,6 +34,39 @@ steps:
     condition: always()
     displayName: 'Generate Allure HTML report'
 
+  - task: PythonScript@0
+    condition: always()
+    displayName: 'Email Allure report'
+    inputs:
+      scriptSource: 'inline'
+      script: |
+        import smtplib
+        from email.mime.multipart import MIMEMultipart
+        from email.mime.base import MIMEBase
+        from email.mime.text import MIMEText
+        from email import encoders
+
+        msg = MIMEMultipart()
+        msg['From'] = 'your-email@gmail.com'
+        msg['To'] = 'abhinashagrawal547@gmail.com'
+        msg['Subject'] = 'WDIO Allure Test Report - Build $(Build.BuildNumber)'
+
+        body = 'Allure report attached for build $(Build.BuildNumber).'
+        msg.attach(MIMEText(body, 'plain'))
+
+        with open('allure-report.zip', 'rb') as f:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(f.read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', 'attachment; filename=allure-report.zip')
+            msg.attach(part)
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login('abhinashagrawal547@gmail.com', '$(EMAIL_APP_PASSWORD)')
+        server.sendmail('abhinashagrawal547@gmail.com', 'abhinashagrawal547@gmail.com', msg.as_string())
+        server.quit()
+
   - task: PublishBuildArtifacts@1
     condition: always()
     inputs:
